@@ -6,7 +6,7 @@ type Indexer interface {
 	Index(doc *Document) error
 	FindByID(linkID uuid.UUID) (*Document, error)
 	Search(query Query) (Iterator, error)
-	UpdateScope(linkID uuid.UUID, score float64) error
+	UpdateScore(linkID uuid.UUID, score float64) error
 }
 
 type Iterator interface {
