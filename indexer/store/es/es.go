@@ -75,7 +75,7 @@ type ESIndexer struct {
 	es *elasticsearch.Client
 }
 
-func NewESIndexer(nodes []string, syncUpdates bool) (*ESIndexer, error) {
+func NewESIndexer(nodes []string) (*ESIndexer, error) {
 	cfg := elasticsearch.Config{
 		Addresses: nodes,
 	}
@@ -197,6 +197,32 @@ func (i *ESIndexer) Search(q indexer.Query) (indexer.Iterator, error) {
 	}
 
 	return &esIterator{es: i.es, searchReq: &esQuery, rs: &esRes, cumIdx: q.Offset}, nil
+}
+
+func (i *ESIndexer) UpdateScore(linkID uuid.UUID, score float64) error {
+	update := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"linkID":   linkID.String(),
+			"PageRank": score,
+		},
+		"doc_as_upsert": true,
+	}
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(update); err != nil {
+		return xerrors.Errorf("update score: %w", err)
+	}
+	res, err := i.es.Update(indexName, linkID.String(), &buf)
+	if err != nil {
+		return xerrors.Errorf("update score: %w", err)
+	}
+	esUpdateResponse := struct {
+		Result string `json:"result"`
+	}{}
+
+	if err := unmarshalResponse(res, &esUpdateResponse); err != nil {
+		return xerrors.Errorf("update score: %w", err)
+	}
+	return nil
 }
 
 func doSearch(es *elasticsearch.Client, query *esQuery) (*esapi.Response, error) {
