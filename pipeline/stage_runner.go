@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"sync"
 
 	"golang.org/x/xerrors"
 )
@@ -47,4 +48,34 @@ func (runner fifo) Run(ctx context.Context, params StageParams) {
 			}
 		}
 	}
+}
+
+type staticWorkerPool struct {
+	runners []StageRunner
+}
+
+// StaticWorkerPool returns a StageRunner that starts a pool of numWorkers to process
+// incoming payload in parallel.
+func StaticWorkerPool(proc Processor, numWorkers int) StageRunner {
+	if numWorkers <= 0 {
+		panic("number of workers should be greater than 0")
+	}
+	runners := make([]StageRunner, numWorkers)
+	for i := range runners {
+		runners[i] = FIFO(proc)
+	}
+
+	return &staticWorkerPool{runners: runners}
+}
+
+func (runner *staticWorkerPool) Run(ctx context.Context, params StageParams) {
+	var wg sync.WaitGroup
+	wg.Add(len(runner.runners))
+	for i := range runner.runners {
+		go func(runnerIndex int) {
+			defer wg.Done()
+			runner.runners[runnerIndex].Run(ctx, params)
+		}(i)
+	}
+	wg.Wait()
 }
