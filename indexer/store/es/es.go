@@ -57,7 +57,7 @@ type esQuery struct {
 		} `json:"function_score"`
 	} `json:"query"`
 	From int `json:"from"`
-	To   int `json:"to"`
+	Size int `json:"size"`
 }
 
 type esSearchRes struct {
@@ -158,15 +158,12 @@ func (i *ESIndexer) FindByID(linkID uuid.UUID) (*indexer.Document, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("find by ID: %w", err)
 	}
-	var esRes struct {
-		DocSource esDoc `json:"_source"`
-	}
-
+	esRes := esDoc{}
 	if err := unmarshalResponse(res, &esRes); err != nil {
 		return nil, xerrors.Errorf("find by ID: %w", err)
 	}
 
-	return mapESDoc(esRes.DocSource), nil
+	return mapESDoc(esRes), nil
 }
 
 func (i *ESIndexer) Search(q indexer.Query) (indexer.Iterator, error) {
@@ -180,7 +177,7 @@ func (i *ESIndexer) Search(q indexer.Query) (indexer.Iterator, error) {
 
 	var esQuery esQuery
 	esQuery.From = int(q.Offset)
-	esQuery.To = batchSize
+	esQuery.Size = batchSize
 	esQuery.Query.ScoreFunc.Query.MultiMatch.Fields = []string{"Title", "Content"}
 	esQuery.Query.ScoreFunc.Query.MultiMatch.Query = q.Expr
 	esQuery.Query.ScoreFunc.ScoreScript.Script.Source = "_score + doc['PageRank'].value"
@@ -254,6 +251,9 @@ func unmarshalResponse(res *esapi.Response, to interface{}) error {
 		var esErr esErrorRes
 		if err := json.NewDecoder(res.Body).Decode(&esErr); err != nil {
 			return err
+		}
+		if esErr.Err.Type == "resource_not_found_exception" {
+			return indexer.ErrNotFound
 		}
 		return xerrors.Errorf("create index: %w", esErr)
 	}

@@ -139,7 +139,7 @@ func (s *SuiteBase) TestPhraseSearch(c *gc.C) {
 		err = s.idx.UpdateScore(id, float64(numDocs-i))
 		c.Assert(err, gc.IsNil)
 	}
-
+	time.Sleep(2 * time.Second)
 	it, err := s.idx.Search(indexer.Query{
 		Type: indexer.Phrase,
 		Expr: "lorem dolor ipsum",
@@ -174,13 +174,14 @@ func (s *SuiteBase) TestMatchSearch(c *gc.C) {
 		err = s.idx.UpdateScore(id, float64(numDocs-i))
 		c.Assert(err, gc.IsNil)
 	}
-
+	time.Sleep(10 * time.Second)
 	it, err := s.idx.Search(indexer.Query{
 		Type: indexer.Match,
 		Expr: "lorem ipsum",
 	})
 	c.Assert(err, gc.IsNil)
-	c.Assert(iterateDocs(c, it), gc.DeepEquals, expIDs)
+	actualIDs := iterateDocs(c, it)
+	c.Assert(actualIDs, gc.DeepEquals, expIDs)
 }
 
 // TestMatchSearchWithOffset verifies the document search logic when searching
@@ -205,6 +206,7 @@ func (s *SuiteBase) TestMatchSearchWithOffset(c *gc.C) {
 		err = s.idx.UpdateScore(id, float64(numDocs-i))
 		c.Assert(err, gc.IsNil)
 	}
+	time.Sleep(5 * time.Second)
 
 	it, err := s.idx.Search(indexer.Query{
 		Type:   indexer.Match,
@@ -245,6 +247,7 @@ func (s *SuiteBase) TestUpdateScore(c *gc.C) {
 		err = s.idx.UpdateScore(id, float64(numDocs-i))
 		c.Assert(err, gc.IsNil)
 	}
+	time.Sleep(5 * time.Second)
 
 	it, err := s.idx.Search(indexer.Query{
 		Type: indexer.Match,
@@ -259,7 +262,7 @@ func (s *SuiteBase) TestUpdateScore(c *gc.C) {
 		err = s.idx.UpdateScore(expIDs[i], float64(i))
 		c.Assert(err, gc.IsNil, gc.Commentf(expIDs[i].String()))
 	}
-
+	time.Sleep(5 * time.Second)
 	it, err = s.idx.Search(indexer.Query{
 		Type: indexer.Match,
 		Expr: "poeta",

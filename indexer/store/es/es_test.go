@@ -26,8 +26,9 @@ func (s *ESIndexerTestSuite) SetUpSuite(c *gc.C) {
 		c.Skip("Missing ES_NODES env; skipping es-based indexer tests")
 	}
 	indexer, err := NewESIndexer(strings.Split(nodesList, ","))
-	c.Assert(err, gc.NotNil)
+	c.Assert(err, gc.IsNil)
 	s.SetIndexer(indexer)
+	s.idx = indexer
 }
 
 func (s *ESIndexerTestSuite) SetUpTest(c *gc.C) {
