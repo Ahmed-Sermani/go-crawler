@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Ahmed-Sermani/search/indexer"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/google/uuid"
 	"golang.org/x/xerrors"
 	gc "gopkg.in/check.v1"

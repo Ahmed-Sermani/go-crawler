@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Ahmed-Sermani/search/indexer"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/google/uuid"

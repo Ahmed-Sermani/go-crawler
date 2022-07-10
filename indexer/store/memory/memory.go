@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Ahmed-Sermani/search/indexer"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search/query"
 	"github.com/google/uuid"

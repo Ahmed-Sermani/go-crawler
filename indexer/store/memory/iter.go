@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/Ahmed-Sermani/search/indexer"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/blevesearch/bleve"
 )
 

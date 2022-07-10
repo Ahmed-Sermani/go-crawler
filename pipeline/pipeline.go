@@ -70,10 +70,3 @@ type Sink interface {
 	// Consume process a Payload instance that's outputted by the pipeline.
 	Consume(context.Context, Payload)
 }
-
-func emitError(err error, errCh chan<- error) {
-	select {
-	case errCh <- err:
-	default: // error channel is full.
-	}
-}

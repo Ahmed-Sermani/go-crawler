@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/Ahmed-Sermani/search/graph"
+import "github.com/Ahmed-Sermani/go-crawler/graph"
 
 type linkIterator struct {
 	s *InMemoryGraph

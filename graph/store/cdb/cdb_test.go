@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Ahmed-Sermani/search/graph/graphtest"
+	"github.com/Ahmed-Sermani/go-crawler/graph/graphtest"
 	gc "gopkg.in/check.v1"
 )
 
@@ -18,12 +18,12 @@ type CockroachDBGraphTestSuite struct {
 
 func Test(t *testing.T) {
 	gc.TestingT(t)
-} 
+}
 
 func (s *CockroachDBGraphTestSuite) SetUpSuite(c *gc.C) {
 	dsn := os.Getenv("CDB_DSN")
 	if dsn == "" {
-		c.Skip("missing cdb dsn; skipping cdb test package")	
+		c.Skip("missing cdb dsn; skipping cdb test package")
 	}
 
 	g, err := NewCockroachDBGraph(dsn)
@@ -42,7 +42,6 @@ func (s *CockroachDBGraphTestSuite) TearDownSuite(c *gc.C) {
 func (s *CockroachDBGraphTestSuite) SetUpTest(c *gc.C) {
 	s.flushDB(c)
 }
-
 
 func (s *CockroachDBGraphTestSuite) flushDB(c *gc.C) {
 	_, err := s.db.Exec("DELETE FROM links")

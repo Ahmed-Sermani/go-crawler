@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Ahmed-Sermani/search/indexer/indexertest"
+	"github.com/Ahmed-Sermani/go-crawler/indexer/indexertest"
 	gc "gopkg.in/check.v1"
 )
 

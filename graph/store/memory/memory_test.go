@@ -3,7 +3,7 @@ package memory
 import (
 	"testing"
 
-	"github.com/Ahmed-Sermani/search/graph/graphtest"
+	"github.com/Ahmed-Sermani/go-crawler/graph/graphtest"
 	gc "gopkg.in/check.v1"
 )
 

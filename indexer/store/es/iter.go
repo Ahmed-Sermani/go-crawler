@@ -1,7 +1,7 @@
 package es
 
 import (
-	"github.com/Ahmed-Sermani/search/indexer"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/elastic/go-elasticsearch/v8"
 )
 

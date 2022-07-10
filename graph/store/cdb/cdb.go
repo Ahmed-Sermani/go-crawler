@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Ahmed-Sermani/search/graph"
+	"github.com/Ahmed-Sermani/go-crawler/graph"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"golang.org/x/xerrors"
@@ -30,7 +30,7 @@ const (
 	iterEdgesQuery = `
   SELECT id, src, dst, updated_at FROM edges WHERE src >= $1 AND src < $2 AND updated_at < $3
   `
-  rmStaleEdgesQuery = `
+	rmStaleEdgesQuery = `
   DELETE FROM edges WHERE src=$1 AND updated_at < $2
   `
 )
@@ -119,5 +119,3 @@ func (c *CockroachDBGraph) RemoveStaleEdges(fromID uuid.UUID, updatedBefore time
 	}
 	return nil
 }
-
-

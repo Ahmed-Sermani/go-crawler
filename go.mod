@@ -1,4 +1,4 @@
-module github.com/Ahmed-Sermani/search
+module github.com/Ahmed-Sermani/go-crawler
 
 go 1.17
 

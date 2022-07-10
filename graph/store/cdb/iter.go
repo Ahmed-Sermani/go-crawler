@@ -3,7 +3,7 @@ package cdb
 import (
 	"database/sql"
 
-	"github.com/Ahmed-Sermani/search/graph"
+	"github.com/Ahmed-Sermani/go-crawler/graph"
 	"golang.org/x/xerrors"
 )
 

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Ahmed-Sermani/search/graph"
+	"github.com/Ahmed-Sermani/go-crawler/graph"
 	"github.com/google/uuid"
 	"golang.org/x/xerrors"
 	gc "gopkg.in/check.v1"
