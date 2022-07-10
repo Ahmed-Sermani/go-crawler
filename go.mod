@@ -10,7 +10,11 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 )
 
-require github.com/elastic/elastic-transport-go/v8 v8.1.0 // indirect
+require (
+	github.com/elastic/elastic-transport-go/v8 v8.1.0 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
+)
 
 require (
 	github.com/RoaringBitmap/roaring v0.4.23 // indirect
