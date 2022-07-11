@@ -59,7 +59,7 @@ func (s *PipelineTestSuite) TestSourceErrorHandling(c *gc.C) {
 
 	p := pipeline.New(testStage{c: c})
 	err := p.Process(context.TODO(), src, sink)
-	c.Assert(err, gc.ErrorMatches, "(?s).*some error*")
+	c.Assert(err, gc.ErrorMatches, "(?s).*some error.*")
 }
 
 func (s *PipelineTestSuite) TestSinkErrorHandling(c *gc.C) {
@@ -69,7 +69,7 @@ func (s *PipelineTestSuite) TestSinkErrorHandling(c *gc.C) {
 
 	p := pipeline.New(testStage{c: c})
 	err := p.Process(context.TODO(), src, sink)
-	c.Assert(err, gc.ErrorMatches, "(?s).*some error*")
+	c.Assert(err, gc.ErrorMatches, "(?s).*some error.*")
 }
 
 func (s *PipelineTestSuite) TestPayloadDiscarding(c *gc.C) {
@@ -176,4 +176,3 @@ func stringPayloads(numValues int) []pipeline.Payload {
 	}
 	return out
 }
-

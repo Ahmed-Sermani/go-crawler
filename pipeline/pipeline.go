@@ -100,7 +100,7 @@ func New(stages ...StageRunner) *Pipeline {
 // It is safe to call Process concurrently with different sources and sinks.
 func (p *Pipeline) Process(ctx context.Context, source Source, sink Sink) error {
 
-	var wg *sync.WaitGroup
+	wg := new(sync.WaitGroup)
 	ctx, ctxCancel := context.WithCancel(ctx)
 	defer ctxCancel()
 

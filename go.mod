@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/blevesearch/bleve v1.0.14
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/lib/pq v1.10.5
