@@ -1,10 +1,11 @@
 module github.com/Ahmed-Sermani/go-crawler
 
-go 1.17
+go 1.18
 
 require (
 	github.com/blevesearch/bleve v1.0.14
 	github.com/google/uuid v1.3.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/lib/pq v1.10.5
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
@@ -13,7 +14,6 @@ require (
 require (
 	github.com/elastic/elastic-transport-go/v8 v8.1.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 )
 
 require (
