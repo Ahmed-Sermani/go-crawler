@@ -4,7 +4,13 @@
 
 package crawler
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+
+	"github.com/Ahmed-Sermani/go-crawler/graph"
+	"github.com/google/uuid"
+)
 
 // URLGetter is implemented by objects that can perform HTTP GET requests.
 type URLGetter interface {
@@ -16,4 +22,15 @@ type URLGetter interface {
 // used as a secuity machnism to prevent exposing internal services to the crawler
 type PrivateNetworkDetector interface {
 	IsPrivate(host string) (bool, error)
+}
+
+// Graph is implemented by objects that can upsert links and edges into a link
+// graph instance.
+type Graph interface {
+	UpsertLink(link *graph.Link) error
+	UpsertEdge(edge *graph.Edge) error
+
+	// RemoveStaleEdges removes any edge that originates from the specified
+	// link ID and was updated before the specified timestamp.
+	RemoveStaleEdges(fromID uuid.UUID, updatedBefore time.Time) error
 }
