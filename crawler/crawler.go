@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Ahmed-Sermani/go-crawler/graph"
+	"github.com/Ahmed-Sermani/go-crawler/indexer"
 	"github.com/google/uuid"
 )
 
@@ -33,4 +34,10 @@ type Graph interface {
 	// RemoveStaleEdges removes any edge that originates from the specified
 	// link ID and was updated before the specified timestamp.
 	RemoveStaleEdges(fromID uuid.UUID, updatedBefore time.Time) error
+}
+
+// Indexer is implemented by objects that can index the contents of web-pages
+// retrieved by the crawler pipeline.
+type Indexer interface {
+	Index(doc *indexer.Document) error
 }
