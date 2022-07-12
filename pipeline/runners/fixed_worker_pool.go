@@ -26,7 +26,7 @@ func FixedWorkerPool(proc pipeline.Processor, numWorkers int) pipeline.StageRunn
 }
 
 func (runner *fixedWorkerPool) Run(ctx context.Context, params pipeline.StageParams) {
-	var wg sync.WaitGroup
+	wg := new(sync.WaitGroup)
 	wg.Add(len(runner.runners))
 	for i := range runner.runners {
 		go func(runnerIndex int) {

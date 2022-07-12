@@ -74,4 +74,3 @@ func (dm docMatcher) Matches(x interface{}) bool {
 func (dm docMatcher) String() string {
 	return fmt.Sprintf("has LinkID=%q, URL=%q, Title=%q, Content=%q and IndexedAt not before %v", dm.linkID, dm.url, dm.title, dm.content, dm.notBefore)
 }
-

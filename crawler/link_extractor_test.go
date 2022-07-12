@@ -224,4 +224,3 @@ func (s *LinkExtractorTestSuite) assertExtractedLinks(c *gc.C, url, content stri
 	c.Assert(p.Links, gc.DeepEquals, expLinks)
 	c.Assert(p.NoFollowLinks, gc.DeepEquals, expNoFollowLinks)
 }
-

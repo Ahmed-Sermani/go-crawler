@@ -56,13 +56,13 @@ func (p *crawlerPayload) Clone() pipeline.Payload {
 
 // MarkAsProcessed cleans the object before putting it back to the pool
 func (p *crawlerPayload) MarkAsProcessed() {
-	/* 
-	   A small optimization trick to reduce the total number of allocations 
-	   that are performed while the pipeline is executing. 
-	   We set the length of both of the slices and the byte 
-	   buffer to zero without modifying their original capacities. 
-	   The next time that a recycled payload is sent through the pipeline, 
-	   any attempt to write to the byte buffer or append to one of the payload slices will reuse the already allocated space 
+	/*
+	   A small optimization trick to reduce the total number of allocations
+	   that are performed while the pipeline is executing.
+	   We set the length of both of the slices and the byte
+	   buffer to zero without modifying their original capacities.
+	   The next time that a recycled payload is sent through the pipeline,
+	   any attempt to write to the byte buffer or append to one of the payload slices will reuse the already allocated space
 	   and only trigger a new memory allocation if additional space is required.
 	*/
 	p.URL = p.URL[:0]
@@ -73,4 +73,3 @@ func (p *crawlerPayload) MarkAsProcessed() {
 	p.TextContent = p.TextContent[:0]
 	payloadPool.Put(p)
 }
-

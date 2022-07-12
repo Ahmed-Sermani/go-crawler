@@ -27,14 +27,15 @@ func DynamicWorkerPool(proc pipeline.Processor, maxWorkers int) pipeline.StageRu
 }
 
 func (p *dynamicWorkerPool) Run(ctx context.Context, params pipeline.StageParams) {
+done:
 	for {
 		select {
 		case <-ctx.Done():
-			break
+			break done
 		case payloadIn, open := <-params.Input():
 
 			if !open {
-				break
+				break done
 			}
 
 			// optain a token
@@ -43,11 +44,11 @@ func (p *dynamicWorkerPool) Run(ctx context.Context, params pipeline.StageParams
 			select {
 			case t = <-p.tPool:
 			case <-ctx.Done():
-				break
+				break done
 			}
 
-			// run the work in a goruntine
-			// when it ends it retruns the token to tPool
+			// run the work in a goroutine
+			// when it ends it returns the token to tPool
 			go func(payloadIn pipeline.Payload, t struct{}) {
 				defer func() { p.tPool <- t }()
 				payloadOut, err := p.proc.Process(ctx, payloadIn)

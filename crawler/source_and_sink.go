@@ -39,5 +39,6 @@ func (s *countingSink) Consume(_ context.Context, p pipeline.Payload) error {
 }
 
 func (s *countingSink) getCount() int {
-	return s.count
+	// divided by to due to the boardcast processor double the payloads that arrives to the sink
+	return s.count / 2
 }

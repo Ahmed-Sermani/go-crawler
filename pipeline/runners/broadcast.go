@@ -27,12 +27,12 @@ func Broadcast(procs ...pipeline.Processor) pipeline.StageRunner {
 func (b *broadcast) Run(ctx context.Context, params pipeline.StageParams) {
 	var (
 		// for concurrency control
-		wg *sync.WaitGroup
-		// broadcastor channels
+		wg = new(sync.WaitGroup)
+		// broadcaster channels
 		pInCh = make([]chan pipeline.Payload, len(b.fifos))
 	)
 
-	// start each fifo in a go-runtine, each fifo gets its own non-buffered input channels.
+	// start each fifo in a go-routine, each fifo gets its own non-buffered input channels.
 	// output and error channels say shared
 	for i := range b.fifos {
 		wg.Add(1)
@@ -52,10 +52,10 @@ done:
 	for {
 		select {
 		case <-ctx.Done():
-			break
+			break done
 		case payloadIn, open := <-params.Input():
 			if !open {
-				break
+				break done
 			}
 
 			// breadcast the payload
