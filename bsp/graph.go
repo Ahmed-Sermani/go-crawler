@@ -48,7 +48,7 @@ type Graph[VT, ET any] struct {
 	superstep    int
 	vertices     map[string]*Vertex[VT, ET]
 	queueFactory message.QueueFactory
-	aggregators map[string]Aggregator
+	aggregators  map[string]Aggregator
 }
 
 // AddVertex inserts a new vertex with the specified id and initial value into

@@ -1,6 +1,7 @@
 package aggregators
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 
@@ -14,8 +15,7 @@ func Test(t *testing.T) {
 	gc.TestingT(t)
 }
 
-type AggregatorTestSuite struct {}
-
+type AggregatorTestSuite struct{}
 
 func (s *AggregatorTestSuite) TestIntAggregator(c *gc.C) {
 	numValues := 100
@@ -29,6 +29,21 @@ func (s *AggregatorTestSuite) TestIntAggregator(c *gc.C) {
 
 	got := s.testConcurrentAccess(new(IntAggregator), values).(int)
 	c.Assert(got, gc.Equals, exp)
+}
+
+func (s *AggregatorTestSuite) TestFloat64Accumulator(c *gc.C) {
+	numValues := 100
+	values := make([]interface{}, numValues)
+	var exp float64
+	for i := 0; i < numValues; i++ {
+		next := rand.Float64()
+		values[i] = next
+		exp += next
+	}
+
+	got := s.testConcurrentAccess(new(Float64Aggregator), values).(float64)
+	absDelta := math.Abs(exp - got)
+	c.Assert(absDelta < 1e-6, gc.Equals, true, gc.Commentf("expected to get %f; got %f; |delta| %f > 1e-6", exp, got, absDelta))
 }
 
 func (s *AggregatorTestSuite) testConcurrentAccess(a bsp.Aggregator, values []interface{}) interface{} {
@@ -58,4 +73,3 @@ func (s *AggregatorTestSuite) testConcurrentAccess(a bsp.Aggregator, values []in
 
 	return a.Get()
 }
-

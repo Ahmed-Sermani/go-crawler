@@ -16,7 +16,7 @@ type Aggregator interface {
 	Get() any
 	// updates the Aggregator value based on the current value.
 	Aggregate(val any)
-	
+
 	// Delta returns the change in the aggregator's value since the last
 	// call to Delta. The delta values can be used in distributed
 	// aggregator use-cases to reduce local, partially-aggregated values
@@ -28,6 +28,4 @@ type Aggregator interface {
 	// node calls delta on each local counter and aggregates the values
 	// to obtain the correct total which is then pushed back to the workers.
 	Delta() any
-
 }
-
