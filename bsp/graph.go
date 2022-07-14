@@ -86,6 +86,49 @@ type Graph[VT, ET any] struct {
 	pendingInStep int64
 }
 
+// NewGraph creates a new Graph instance using the specified configuration. It
+// is important for callers to invoke Close() on the returned graph instance
+// when they are done using it.
+func NewGraph[VT, ET any](cfg GraphConfig[VT, ET]) (*Graph[VT, ET], error) {
+	if err := cfg.validate(); err != nil {
+		return nil, xerrors.Errorf("graph config validation failed: %w", err)
+	}
+
+	g := &Graph[VT, ET]{
+		computeFunc:  cfg.ComputeFn,
+		queueFactory: cfg.QueueFactory,
+		aggregators:  make(map[string]Aggregator),
+		vertices:     make(map[string]*Vertex[VT, ET]),
+	}
+	g.startWorkers(cfg.ComputeWorkers)
+
+	return g, nil
+}
+
+// Close releases any resources associated with the graph.
+func (g *Graph[VT, ET]) Close() error {
+	close(g.vertexCh)
+	g.wg.Wait()
+
+	return g.Reset()
+}
+
+// Reset the state of the graph by removing any existing vertices or
+// aggregators and resetting the superstep counter.
+func (g *Graph[VT, ET]) Reset() error {
+	g.superstep = 0
+	for _, v := range g.vertices {
+		for i := 0; i < 2; i++ {
+			if err := v.msgQueue[i].Close(); err != nil {
+				return xerrors.Errorf("closing message queue #%d for vertex %v: %w", i, v.ID(), err)
+			}
+		}
+	}
+	g.vertices = make(map[string]*Vertex[VT, ET])
+	g.aggregators = make(map[string]Aggregator)
+	return nil
+}
+
 // AddVertex inserts a new vertex with the specified id and initial value into
 // the graph. If the vertex already exists, AddVertex will just overwrite its
 // value with the provided initValue.
