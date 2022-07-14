@@ -49,6 +49,7 @@ type Graph[VT, ET any] struct {
 	vertices     map[string]*Vertex[VT, ET]
 	queueFactory message.QueueFactory
 	aggregators  map[string]Aggregator
+	relayer      Relayer
 }
 
 // AddVertex inserts a new vertex with the specified id and initial value into
@@ -90,8 +91,57 @@ func (g *Graph[VT, ET]) RegisterAggregator(name string, aggregator Aggregator) {
 	g.aggregators[name] = aggregator
 }
 
+// RegisterRelayer configures a Relayer that the graph will invoke when
+// attempting to deliver a message to a vertex that is not known locally but
+// could potentially be owned by a remote graph instance.
+func (g *Graph[VT, ET]) RegisterRelayer(relayer Relayer) { g.relayer = relayer }
+
 func (g *Graph[VT, ET]) Aggregator(name string) Aggregator {
 	return g.aggregators[name]
 }
 
 func (g *Graph[VT, ET]) Aggregators() map[string]Aggregator { return g.aggregators }
+
+// BroadcastToNeighbors broadcasts the provided message to the neighboring vertecies (local or remote).
+// Neighbors will recive the message in the next super-step
+func (g *Graph[VT, ET]) BroadcastToNeighbors(v *Vertex[VT, ET], msg message.Message) error {
+	for _, e := range v.edges {
+		if err := g.SendMessage(e.DstID(), msg); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// SendMessage attempts to deliver a message to the vertex with the specified
+// destination ID. Messages are queued for delivery and will be processed by
+// receipients in the next superstep.
+//
+// If the destination ID is not known by this graph, it might still be a valid
+// ID for a vertex that is owned by a remote graph instance. If the client has
+// provided a Relayer when configuring the graph, SendMessage will delegate
+// message delivery to it.
+//
+// On the other hand, if no Relayer is defined or the configured
+// RemoteMessageSender returns a ErrDestinationIsLocal error, SendMessage will
+// first check whether an UnknownVertexHandler has been provided at
+// configuration time and invoke it. Otherwise, an ErrInvalidMessageDestination
+// is returned to the caller.
+func (g *Graph[VT, ET]) SendMessage(dst string, msg message.Message) error {
+	dstVertex := g.vertices[dst]
+	if dstVertex != nil {
+		// send the message locally to reciver vertex in the next superstep
+		return dstVertex.msgQueue[(g.superstep+1)%2].Enqueue(msg)
+	}
+
+	// the vertex is not know locally. This could mean that the vertex is partitioned to be
+	// processed by a remote graph instance running on a another node.
+	// the relayer is defined. Delegate message passing to it.
+	if g.relayer != nil {
+		if err := g.relayer.Relay(dst, msg); !xerrors.Is(err, ErrDestinationIsLocal) {
+			return err
+		}
+	}
+
+	return xerrors.Errorf("can't deliver message to %q: %w", dst, ErrInvalidMessageDestination)
+}

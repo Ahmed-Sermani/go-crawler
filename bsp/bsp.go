@@ -5,10 +5,15 @@
 package bsp
 
 import (
+	"github.com/Ahmed-Sermani/go-crawler/bsp/message"
 	"golang.org/x/xerrors"
 )
 
-var ErrUnknownEdgeSource = xerrors.New("source vertex is not part of the graph")
+var (
+	ErrUnknownEdgeSource         = xerrors.New("source vertex is not part of the graph")
+	ErrDestinationIsLocal        = xerrors.New("message destination is assigned to the local graph")
+	ErrInvalidMessageDestination = xerrors.New("invalid message destination")
+)
 
 type Aggregator interface {
 	Type() string
@@ -28,4 +33,19 @@ type Aggregator interface {
 	// node calls delta on each local counter and aggregates the values
 	// to obtain the correct total which is then pushed back to the workers.
 	Delta() any
+}
+
+// Relayer implemeted by types that relay messages to vertecies that are
+// managed by remote graph instance.
+type Relayer interface {
+	// Relay a message to a vertex that's not known locally. returns ErrDestinationIsLocal
+	// if the provided destination is not valid remote vertex.
+	Relay(dst string, msg message.Message) error
+}
+
+// RelayerFunc function adapter to the Relayer interface.
+type RelayerFunc func(dst string, msg message.Message) error
+
+func (r RelayerFunc) Relay(dst string, msg message.Message) error {
+	return r(dst, msg)
 }
