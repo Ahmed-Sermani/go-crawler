@@ -11,7 +11,7 @@ type inMemoryQueue struct {
 }
 
 // inMemoryQueue is concurrency safe for enqueue and dequeue but the returned iterator is not safe for concurrent access.
-func NewInMemoryQueue() *inMemoryQueue {
+func NewInMemoryQueue() Queue {
 	return new(inMemoryQueue)
 }
 
