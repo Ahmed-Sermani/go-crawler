@@ -1,6 +1,9 @@
 package bsp
 
 import (
+	"sync"
+	"sync/atomic"
+
 	"github.com/Ahmed-Sermani/go-crawler/bsp/message"
 	"golang.org/x/xerrors"
 )
@@ -55,6 +58,32 @@ type Graph[VT, ET any] struct {
 	aggregators  map[string]Aggregator
 	relayer      Relayer
 	computeFunc  ComputeFunc[VT, ET]
+
+	// wg used for compute workers
+	wg sync.WaitGroup
+
+	// vertexCh polled by compute function workers to optain the next
+	// to be processed
+	vertexCh chan *Vertex[VT, ET]
+
+	// errCh is buffered channel where workers publish any errors that occurs
+	// during invokion the compute function.
+	// When compute worker detects an error it will attempts to publish it into the channel.
+	// if the channel is full, another error has already been written to it, the new error will
+	// be safely ignored.
+	errCh chan error
+
+	// stepCompletedCh channel allows compute workers to signal
+	// when the last enqueued vertex has been processed.
+	stepCompletedCh chan struct{}
+
+	// activeInStep is the number of vertices that are processed in the superstep
+	// it will be reset at the start of superstep
+	activeInStep int64
+
+	// pendingInStep is the number of pending vertices to be processed in the superstep
+	// it's set to len(vertices) at the start of the superstep
+	pendingInStep int64
 }
 
 // AddVertex inserts a new vertex with the specified id and initial value into
@@ -149,4 +178,82 @@ func (g *Graph[VT, ET]) SendMessage(dst string, msg message.Message) error {
 	}
 
 	return xerrors.Errorf("can't deliver message to %q: %w", dst, ErrInvalidMessageDestination)
+}
+
+// startWorkers allocates the required channels and spins up numWorkers to
+// execute each superstep.
+func (g *Graph[VT, ET]) startWorkers(numWorkers int) {
+	g.vertexCh = make(chan *Vertex[VT, ET])
+	g.errCh = make(chan error, 1)
+	g.stepCompletedCh = make(chan struct{})
+
+	g.wg.Add(numWorkers)
+	for i := 0; i < numWorkers; i++ {
+		go g.stepWorker()
+	}
+}
+
+// stepWorker consumes vertexCh for incoming vertices and executes the configured
+// ComputeFunc for each one. The worker exits when vertexCh gets
+// closed.
+func (g *Graph[VT, ET]) stepWorker() {
+	defer g.wg.Done()
+	for v := range g.vertexCh {
+		stepMsgQueueBuffer := g.superstep % 2
+		if v.active || v.msgQueue[stepMsgQueueBuffer].PendingMessages() {
+			_ = atomic.AddInt64(&g.activeInStep, 1)
+			v.active = true
+
+			// execute the compute funciton on the vertex
+			err := g.computeFunc(g, v, v.msgQueue[stepMsgQueueBuffer].Messages())
+			if err != nil {
+				emitError(g.errCh, xerrors.Errorf("error while running compute function for vertex %q: %w", v.ID(), err))
+				// flush non-comsumed messages
+			} else if err := v.msgQueue[stepMsgQueueBuffer].DiscardMessages(); err != nil {
+				emitError(g.errCh, xerrors.Errorf("failed discarding un-processed message for vertex %q: %w", v.ID(), err))
+			}
+		}
+		if atomic.AddInt64(&g.pendingInStep, -1) == 0 {
+			g.stepCompletedCh <- struct{}{}
+		}
+	}
+}
+
+// Step executes the next superstep and returns back the number of vertices
+// that were processed either because they were still active or because they
+// received a message.
+func (g *Graph[VT, ET]) step() (int, error) {
+	// at the start of the superstep
+	// it's safe to assgin values to these variables directly
+	g.activeInStep = 0
+	g.pendingInStep = int64(len(g.vertices))
+
+	// no work to do
+	if g.pendingInStep == 0 {
+		return 0, nil
+	}
+
+	// send vertices to the channel to be processed
+	for _, v := range g.vertices {
+		g.vertexCh <- v
+	}
+
+	// block until the worker pool has finished processing all vertices
+	<-g.stepCompletedCh
+
+	// get errors happend during the executing the step
+	var err error
+	select {
+	case err = <-g.errCh:
+	default: // no error
+	}
+
+	return int(g.activeInStep), err
+}
+
+func emitError(errCh chan<- error, err error) {
+	select {
+	case errCh <- err:
+	default: // the channel already contains an error
+	}
 }
