@@ -5,6 +5,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// ComputeFunc is a function that a graph instance invokes on each vertex when
+// executing a superstep.
+type ComputeFunc[VT, ET any] func(g *Graph[VT, ET], v *Vertex[VT, ET], msgIt message.Iterator) error
+
 type Vertex[VT any, ET any] struct {
 	id     string
 	value  VT
@@ -50,6 +54,7 @@ type Graph[VT, ET any] struct {
 	queueFactory message.QueueFactory
 	aggregators  map[string]Aggregator
 	relayer      Relayer
+	computeFunc  ComputeFunc[VT, ET]
 }
 
 // AddVertex inserts a new vertex with the specified id and initial value into
