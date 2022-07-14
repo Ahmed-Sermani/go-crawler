@@ -181,6 +181,8 @@ func (g *Graph[VT, ET]) Aggregators() map[string]Aggregator { return g.aggregato
 
 func (g *Graph[VT, ET]) Superstep() int { return g.superstep }
 
+func (g *Graph[VT, ET]) Vertices() map[string]*Vertex[VT, ET] { return g.vertices }
+
 // BroadcastToNeighbors broadcasts the provided message to the neighboring vertecies (local or remote).
 // Neighbors will recive the message in the next super-step
 func (g *Graph[VT, ET]) BroadcastToNeighbors(v *Vertex[VT, ET], msg message.Message) error {
