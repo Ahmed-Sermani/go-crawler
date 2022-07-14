@@ -11,6 +11,9 @@ type Executor[VT, ET any] struct {
 	cb ExecutorHooks[VT, ET]
 }
 
+// ExecutorFactory is a function that creates new Executor instances.
+type ExecutorFactory[VT, ET any] func(*Graph[VT, ET], ExecutorHooks[VT, ET]) *Executor[VT, ET]
+
 // NewExecutor returns an Executor instance for graph g that invokes the
 // provided list of hooks inside each execution loop.
 func NewExecutor[VT, ET any](g *Graph[VT, ET], cb ExecutorHooks[VT, ET]) *Executor[VT, ET] {
