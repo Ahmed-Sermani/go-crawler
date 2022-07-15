@@ -38,6 +38,10 @@ test:
 	@echo "[go test] running tests and collecting coverage metrics"
 	CDB_DSN=${CDB_DSN} ES_NODES=${ES_NODES} go test -v -tags all_tests -race -coverprofile=coverage.txt -covermode=atomic ./...
 
+test_unit:
+	@echo "[go test] running unit tests and collection coverage metrics"
+	go test -v -tags all_tests -race -coverprofile=coverage.txt -covermode=atomic ./...
+
 test-debug:
 	@read -p "Enter Test Package You Wish To Debug:" package_name; \
 	CDB_DSN=${CDB_DSN} ES_NODES=${ES_NODES} dlv test $$package_name;
