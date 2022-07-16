@@ -1,0 +1,48 @@
+syntax="proto3";
+package indexer.v1;
+
+option go_package = "github.com/Ahmed-Sermani/go-crawler/api/indexer/proto;proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message Document {
+    bytes link_id = 1;
+    string url = 2;
+    string title = 3;
+    string content = 4;
+    google.protobuf.Timestamp indexed_at = 5;
+}
+
+message Query {
+    Type type = 1;
+    string expression = 2;
+
+    uint64 offset = 3;
+
+    enum Type {
+        MATCH = 0;
+        PHRASE = 1;
+    }
+}
+
+message QueryResult {
+    oneof result {
+        uint64 doc_count = 1;
+        Document doc = 2;
+    }
+}
+
+message UpdateScoreRequest {
+    bytes link_id = 1;
+    double page_rank_score = 2;
+}
+
+service Indexer {
+    rpc Index(Document) returns (Document);
+
+    rpc Search(Query) returns (stream QueryResult);
+
+    rpc UpdateScore(UpdateScoreRequest) returns (google.protobuf.Empty);
+}
+
