@@ -14,7 +14,7 @@ type IncomingScoreMessage struct {
 
 func (pr IncomingScoreMessage) Type() string { return "score" }
 
-// makeRankerComputeFunc returns a ComputeFunc that executes the PageRank ranker 
+// makeRankerComputeFunc returns a ComputeFunc that executes the PageRank ranker
 // algorithm using the provided dampingFactor value.
 func makeRankerComputeFunc(dampingFactor float64) bsp.ComputeFunc[float64, any] {
 	return func(g *bsp.Graph[float64, any], v *bsp.Vertex[float64, any], msgIt message.Iterator) error {
@@ -72,4 +72,3 @@ func makeRankerComputeFunc(dampingFactor float64) bsp.ComputeFunc[float64, any] 
 		return g.BroadcastToNeighbors(v, IncomingScoreMessage{newScore / numOutLinks})
 	}
 }
-

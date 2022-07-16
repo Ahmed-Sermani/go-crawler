@@ -1,0 +1,40 @@
+syntax="proto3";
+package graph.v1;
+
+option go_package = "github.com/Ahmed-Sermani/go-crawler/api/graph/proto;proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message Link {
+    bytes uuid = 1;
+    string url = 2;
+    google.protobuf.Timestamp retrieved_at = 3;
+}
+
+message Edge {
+    bytes uuid = 1;
+    bytes src_uuid = 2;
+    bytes dst_uuid = 3;
+    google.protobuf.Timestamp updated_at = 4;
+}
+
+message RemoveStaleEdgesQuery {
+    bytes from_uuid = 1;
+    google.protobuf.Timestamp updated_before = 2;
+}
+
+message Range {
+    bytes from_uuid = 1;
+    bytes to_uuid = 2;
+    google.protobuf.Timestamp filter = 3;
+}
+
+service Graph {
+    rpc UpsertLink(Link) returns (Link);
+    rpc UpsertEdge(Edge) returns (Edge);
+    rpc Links(Range) returns (stream Link);
+    rpc Edges(Range) returns (stream Edge);
+    rpc RemoveStaleEdges(RemoveStaleEdgesQuery) returns (google.protobuf.Empty);
+}
+

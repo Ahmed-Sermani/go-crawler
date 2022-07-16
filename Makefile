@@ -3,6 +3,7 @@ CDB_DSN ?= postgresql://root@localhost:26257/linkgraph?sslmode=disable
 DB_NAME ?= linkgraph
 DB_CONTAINER ?= cdb
 ES_NODES ?= http://localhost:9200
+API_PROTO_FILES=$(shell find api -name *.proto)
 
 db-run-migrations: migrate-check-deps check-db-env
 	migrate -source file://migrations -database '$(subst postgresql,cockroach,${CDB_DSN})' up
@@ -52,3 +53,15 @@ apply:
 
 up-cluster:
 	@kind create cluster --name search --config ${KIND_CONFIG}
+
+proto: ensure-proto-deps
+	@echo "[protoc] generating protos for API"
+	@protoc --proto_path=. \
+ 	       	   --go_out=paths=source_relative:. \
+ 	       	   --go-grpc_out=paths=source_relative:. \
+	       	   $(API_PROTO_FILES)
+
+ensure-proto-deps:
+	@echo "[go get] ensuring protoc packages are available"
+	@go get google.golang.org/grpc
+	@go get google.golang.org/protobuf

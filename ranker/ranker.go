@@ -158,5 +158,3 @@ func residualInputAccName(superstep int) string {
 	}
 	return "residual_1"
 }
-
-

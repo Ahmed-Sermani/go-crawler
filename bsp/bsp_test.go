@@ -18,7 +18,7 @@ func Test(t *testing.T) {
 	gc.TestingT(t)
 }
 
-type GraphTestSuite struct {}
+type GraphTestSuite struct{}
 
 func (s *GraphTestSuite) TestMessageExchange(c *gc.C) {
 	g, err := bsp.NewGraph(bsp.GraphConfig[int, any]{
@@ -240,5 +240,3 @@ func execFixedSteps[VT any](g *bsp.Graph[VT, any], numSteps int) error {
 	exec := bsp.NewExecutor(g, bsp.ExecutorHooks[VT, any]{})
 	return exec.RunSteps(context.TODO(), numSteps)
 }
-
-

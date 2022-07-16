@@ -118,7 +118,6 @@ func (c *Calculator) ShortestPathTo(dstID string) ([]string, int, error) {
 	return path, minDist, nil
 }
 
-
 func (c *Calculator) findShortestPath(
 	g *bsp.Graph[*pathState, int],
 	v *bsp.Vertex[*pathState, int],

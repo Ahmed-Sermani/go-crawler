@@ -76,7 +76,6 @@ func (ex *Executor[VT, ET]) Superstep() int {
 	return ex.g.Superstep()
 }
 
-
 func (ex *Executor[VT, ET]) run(ctx context.Context, maxSteps int) error {
 	var (
 		activeInStep int
@@ -92,7 +91,7 @@ func (ex *Executor[VT, ET]) run(ctx context.Context, maxSteps int) error {
 			break
 		default:
 		}
-		
+
 		// runs hooks and the superstep
 		if err = cb.PreStep(ctx, ex.g); err != nil {
 			break

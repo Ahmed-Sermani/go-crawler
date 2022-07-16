@@ -102,4 +102,3 @@ func (s *ShortestPathTestSuite) TestShortestPathCostTo(c *gc.C) {
 func Test(t *testing.T) {
 	gc.TestingT(t)
 }
-

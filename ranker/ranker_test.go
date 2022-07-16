@@ -29,7 +29,7 @@ type spec struct {
 	expScores map[string]float64
 }
 
-type RankerTestSuite struct {}
+type RankerTestSuite struct{}
 
 func (s *RankerTestSuite) TestSimpleGraphCase1(c *gc.C) {
 	spec := spec{
@@ -215,4 +215,3 @@ func (s *RankerTestSuite) assertrankerScores(c *gc.C, spec spec) {
 
 	c.Assert((1.0-prSum) <= 0.001, gc.Equals, true, gc.Commentf("expected all ranker scores to add up to 1.0; got %f", prSum))
 }
-
