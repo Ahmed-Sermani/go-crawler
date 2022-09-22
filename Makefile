@@ -4,6 +4,23 @@ DB_NAME ?= linkgraph
 DB_CONTAINER ?= cdb
 ES_NODES ?= http://localhost:9200
 API_PROTO_FILES=$(shell find api -name *.proto)
+IMAGE ?= search
+SHA = $(shell git rev-parse --short HEAD)
+
+
+build-image:
+	@echo "[docker build] building ${IMAGE}:${SHA}"
+	@docker build --file ./Dockerfile \
+		--tag ${IMAGE}:${SHA} \
+		--tag ${IMAGE}:latest \
+		-t ${IMAGE} \
+		.
+	
+minikube-push-image:
+	@echo "[minikube load image] loading ${PREFIX}${IMAGE}:${SHA}"	
+	@minikube image load ${IMAGE}:${SHA}
+
+minikube-build-push: build-image minikube-push-image
 
 db-run-migrations: migrate-check-deps check-db-env
 	migrate -source file://migrations -database '$(subst postgresql,cockroach,${CDB_DSN})' up
