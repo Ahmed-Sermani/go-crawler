@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"net/url"
+	"os"
 	"os/signal"
 	"runtime"
 	"strings"
@@ -27,9 +28,25 @@ import (
 )
 
 var (
-    appName = "Search-Engine"
+    appName = "go-crawler"
     appSha = ""
 )
+
+func main() {
+    host, _ := os.Hostname()
+    rlogger := logrus.New()
+    logger := rlogger.WithFields(logrus.Fields{
+        "app": appName,
+        "sha": appSha,
+        "host": host,
+    })
+
+    if err := run(logger); err != nil {
+        logger.WithError(err).Error("fatal error encountered; shutting down")
+        os.Exit(1)
+    }
+    logger.Info("shutting down complete")
+}
 
 func run(logger *logrus.Entry) error {
 	svcGroup, err := setupServices(logger)
