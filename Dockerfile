@@ -1,0 +1,21 @@
+FROM golang:1.18 as builder
+
+WORKDIR /app
+COPY go.* .
+
+RUN go mod download
+COPY . ./
+
+RUN GIT_SHA=$(git rev-parse --short HEAD) && \
+    CGO_ENABLED=0 GOARCH=amd64 GOOS=linux \
+    go build -a \
+    -ldflags "-extldflags '-static' -w -s -X main.appSha=$GIT_SHA" \
+    -o /go/bin/search \ 
+    .
+
+
+FROM alpine
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY --from=builder /go/bin/search /go/bin/search
+
+ENTRYPOINT ["/go/bin/search"]
