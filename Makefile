@@ -6,6 +6,21 @@ ES_NODES ?= http://localhost:9200
 API_PROTO_FILES=$(shell find api -name *.proto)
 IMAGE ?= search
 SHA = $(shell git rev-parse --short HEAD)
+MINIKUBE_RAM ?= 5g
+MINIKUBE_CPUS ?= 3
+MINIKUBE_K8S_VERSION ?= 1.25.0
+MINIKUBE_NODES ?= 2
+
+minikube-up: 
+	@echo "[minikube] bootstrapping (network-plugin: cni) cluster with kubernetes ${MINIKUBE_K8S_VERSION} and reserving ${MINIKUBE_RAM} of RAM and ${MINIKUBE_CPUS} CPU(s)" 
+	@minikube start \
+		--network-plugin=cni \
+		--kubernetes-version=${MINIKUBE_K8S_VERSION} \
+		--memory=${MINIKUBE_RAM} \
+		--cpus=${MINIKUBE_CPUS} \
+		--nodes=${MINIKUBE_NODES}
+	@echo "[minikube] enabling addons: ingress" 
+	@minikube addons enable ingress
 
 
 build-image:
