@@ -1,0 +1,15 @@
+statefulset:
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "512Mi"
+conf:
+  cache: "50Mi"
+  max-sql-memory: "256Mi"
+
+tls: 
+    enabled: false
+
+image:
+    tag: v22.1.7

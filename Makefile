@@ -8,7 +8,7 @@ IMAGE ?= search
 SHA = $(shell git rev-parse --short HEAD)
 MINIKUBE_RAM ?= 5g
 MINIKUBE_CPUS ?= 3
-MINIKUBE_K8S_VERSION ?= 1.25.0
+MINIKUBE_K8S_VERSION ?= 1.24.0
 MINIKUBE_NODES ?= 2
 
 minikube-up: 
@@ -21,6 +21,27 @@ minikube-up:
 		--nodes=${MINIKUBE_NODES}
 	@echo "[minikube] enabling addons: ingress" 
 	@minikube addons enable ingress
+	@echo "[helm] adding required repos"
+	@helm repo add cockroachdb https://charts.cockroachdb.com/
+	@helm repo add elastic https://helm.elastic.co
+
+
+
+
+deploy:
+	@echo "[kubectl apply] deploying namespaces"
+	@kubectl apply -f ./build/k8s/namespaces.yaml
+	@echo "[helm install] deploying dataplane components"
+	@echo "[helm install] deploying cockroachdb"
+	@helm upgrade cdb -i \
+	    -n dataplane \
+	    -f ./build/k8s/cdb.yaml \
+	    cockroachdb/cockroachdb
+	@echo "[helm install] deploying elasticsearch"
+	@helm upgrade es -i \
+	    -n dataplane \
+	    -f ./build/k8s/es.yaml \
+	    elastic/elasticsearch
 
 
 build-image:
@@ -89,9 +110,9 @@ up-cluster:
 proto: ensure-proto-deps
 	@echo "[protoc] generating protos for API"
 	@protoc --proto_path=. \
- 	       	   --go_out=paths=source_relative:. \
- 	       	   --go-grpc_out=paths=source_relative:. \
-	       	   $(API_PROTO_FILES)
+ 		   	   --go_out=paths=source_relative:. \
+ 		   	   --go-grpc_out=paths=source_relative:. \
+		   	   $(API_PROTO_FILES)
 
 ensure-proto-deps:
 	@echo "[go get] ensuring protoc packages are available"
