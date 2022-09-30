@@ -5,6 +5,7 @@ DB_CONTAINER ?= cdb
 ES_NODES ?= http://localhost:9200
 API_PROTO_FILES=$(shell find api -name *.proto)
 IMAGE ?= search
+CDB_MIGRATIONS_IMAGE ?= cdb-migrations
 SHA = $(shell git rev-parse --short HEAD)
 MINIKUBE_RAM ?= 5g
 MINIKUBE_CPUS ?= 3
@@ -19,14 +20,12 @@ minikube-up:
 		--memory=${MINIKUBE_RAM} \
 		--cpus=${MINIKUBE_CPUS} \
 		--nodes=${MINIKUBE_NODES}
-	@echo "[minikube] enabling addons: ingress" 
+	@echo "[minikube] enabling addons: ingress, registry" 
 	@minikube addons enable ingress
+	@minikube addons enable registry
 	@echo "[helm] adding required repos"
 	@helm repo add cockroachdb https://charts.cockroachdb.com/
 	@helm repo add elastic https://helm.elastic.co
-
-
-
 
 deploy:
 	@echo "[kubectl apply] deploying namespaces"
@@ -46,15 +45,23 @@ deploy:
 
 build-image:
 	@echo "[docker build] building ${IMAGE}:${SHA}"
-	@docker build --file ./Dockerfile \
+	@docker build --file ./Dockerfile.search-monilith \
 		--tag ${IMAGE}:${SHA} \
 		--tag ${IMAGE}:latest \
 		-t ${IMAGE} \
 		.
+	@echo "[docker build] building ${CDB_MIGRATIONS_IMAGE}:${SHA}"
+	@docker build --file ./Dockerfile.cdb-migrations \
+		--tag ${CDB_MIGRATIONS_IMAGE}:${SHA} \
+		--tag ${CDB_MIGRATIONS_IMAGE}:latest \
+		-t ${CDB_MIGRATIONS_IMAGE} \
+		.
 	
 minikube-push-image:
-	@echo "[minikube load image] loading ${PREFIX}${IMAGE}:${SHA}"	
-	@minikube image load ${IMAGE}:${SHA}
+	@echo "[minikube load image] loading ${IMAGE}:latest"	
+	@minikube image load ${IMAGE}:latest
+	@echo "[minikube load image] loading ${CDB_MIGRATIONS_IMAGE}:latest"	
+	@minikube image load ${CDB_MIGRATIONS_IMAGE}:latest
 
 minikube-build-push: build-image minikube-push-image
 

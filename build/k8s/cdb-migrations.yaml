@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: cdb-migrations
+    namespace: dataplane
+spec:
+    template:
+        spec:
+            containers:
+            - name: cdb-migrations
+              imagePullPolicy: Always
+              image: localhost:5000/cdb-migrations:latest
+              args: 
+                 - "linkgraph"
+                 - "cdb-cockroachdb-public.dataplane"
+              restartPolicy: Never

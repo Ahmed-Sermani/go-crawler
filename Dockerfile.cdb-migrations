@@ -1,0 +1,6 @@
+FROM cockroachdb/cockroach:v22.1.7
+
+COPY ./migrations /migrations
+COPY ./hack/cdb-migrations.sh .
+
+ENTRYPOINT ["bash", "./cdb-migrations.sh"]
