@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: search-ingress
+  namespace: search
+spec:
+  rules:
+  - http:
+      paths:
+        - backend:
+            service:
+              name: search-svc
+              port:
+                number: 80
+          path: /*
+          pathType: ImplementationSpecific
+

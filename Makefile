@@ -4,7 +4,7 @@ DB_NAME ?= linkgraph
 DB_CONTAINER ?= cdb
 ES_NODES ?= http://localhost:9200
 API_PROTO_FILES=$(shell find api -name *.proto)
-IMAGE ?= search
+IMAGE ?= search-monolith
 CDB_MIGRATIONS_IMAGE ?= cdb-migrations
 SHA = $(shell git rev-parse --short HEAD)
 MINIKUBE_RAM ?= 5g
@@ -30,6 +30,10 @@ minikube-up:
 deploy:
 	@echo "[kubectl apply] deploying namespaces"
 	@kubectl apply -f ./build/k8s/namespaces.yaml
+	@kubectl apply -f ./build/k8s/statefullset.yaml
+	@kubectl apply -f ./build/k8s/svc.yaml
+	@kubectl apply -f ./build/k8s/svc-headless.yaml
+	@kubectl apply -f ./build/k8s/ingress.yaml
 	@echo "[helm install] deploying dataplane components"
 	@echo "[helm install] deploying cockroachdb"
 	@helm upgrade cdb -i \
@@ -41,6 +45,8 @@ deploy:
 	    -n dataplane \
 	    -f ./build/k8s/es.yaml \
 	    elastic/elasticsearch
+	@echo "[kubectl apply] applying migrations job"
+	@kubectl apply -f ./build/k8s/cdb-migrations.yaml
 
 
 build-image:

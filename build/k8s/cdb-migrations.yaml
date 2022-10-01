@@ -13,4 +13,4 @@ spec:
               args: 
                  - "linkgraph"
                  - "cdb-cockroachdb-public.dataplane"
-              restartPolicy: Never
+            restartPolicy: Never

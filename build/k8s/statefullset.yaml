@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: search-monolith
+  namespace: search
+  labels:
+    app: search-monolith
+spec:
+  serviceName: search-service
+  selector:
+    matchLabels:
+      app: search-monolith
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: search-monolith
+    spec:
+      containers:
+      - name: search-monolith
+        imagePullPolicy: Always
+        image: localhost:5000/search-monolith:latest
+        args:
+          - "-crawler-update-interval=5m"
+          - "-crawler-num-workers=64"
+          - "-pagerank-update-interval=15m"
+          - "-pagerank-num-workers=8"
+          - "-link-graph-uri=postgresql://cdb-cockroachdb-public.dataplane:26257/linkgraph?sslmode=disable"
+          - "-text-indexer-uri=es://elasticsearch-master.dataplane:9200"
+          - "-partition-detection-mode=dns=search-svc-headless"
+        ports:
+        - containerPort: 8080
+          name: front
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 100m
