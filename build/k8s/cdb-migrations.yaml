@@ -8,8 +8,8 @@ spec:
         spec:
             containers:
             - name: cdb-migrations
-              imagePullPolicy: Always
-              image: localhost:5000/cdb-migrations:latest
+              imagePullPolicy: Never
+              image: cdb-migrations:latest
               args: 
                  - "linkgraph"
                  - "cdb-cockroachdb-public.dataplane"

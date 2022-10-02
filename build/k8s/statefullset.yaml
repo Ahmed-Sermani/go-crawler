@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: search-monolith
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         image: localhost:5000/search-monolith:latest
         args:
           - "-crawler-update-interval=5m"
