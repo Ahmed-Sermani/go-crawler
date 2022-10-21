@@ -76,7 +76,7 @@ func setupServices(logger *logrus.Entry) (service.ServiceGroup, error) {
 	flag.DurationVar(&crawlerCfg.ReIndexThreshold, "crawler-reindex-threshold", 7*24*time.Hour, "The minimum amount of time before re-indexing an already-crawled link")
 
 	flag.IntVar(&pageRankCfg.ComputeWorkers, "ranker-num-workers", runtime.NumCPU(), "The number of workers to use for calculating ranker scores (defaults to number of CPUs)")
-	flag.DurationVar(&pageRankCfg.UpdateInterval, "pagerank-update-interval", time.Hour, "The time between subsequent ranker score updates")
+	flag.DurationVar(&pageRankCfg.UpdateInterval, "ranker-update-interval", time.Hour, "The time between subsequent ranker score updates")
 
 	linkGraphURI := flag.String("link-graph-uri", "in-memory://", "The URI for connecting to the link-graph (supported URIs: in-memory://, postgresql://user@host:26257/linkgraph?sslmode=disable)")
 	textIndexerURI := flag.String("text-indexer-uri", "in-memory://", "The URI for connecting to the text indexer (supported URIs: in-memory://, es://node1:9200,...,nodeN:9200)")

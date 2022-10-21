@@ -1,4 +1,3 @@
-KIND_CONFIG := ./build/kind-cluster-config.yml
 CDB_DSN ?= postgresql://root@localhost:26257/linkgraph?sslmode=disable
 DB_NAME ?= linkgraph
 DB_CONTAINER ?= cdb
@@ -7,22 +6,11 @@ API_PROTO_FILES=$(shell find api -name *.proto)
 IMAGE ?= search-monolith
 CDB_MIGRATIONS_IMAGE ?= cdb-migrations
 SHA = $(shell git rev-parse --short HEAD)
-MINIKUBE_RAM ?= 5g
-MINIKUBE_CPUS ?= 3
-MINIKUBE_K8S_VERSION ?= 1.24.0
-MINIKUBE_NODES ?= 2
+KIND_IMSGE ?= kindest/node:v1.24.6
 
-minikube-up: 
-	@echo "[minikube] bootstrapping (network-plugin: cni) cluster with kubernetes ${MINIKUBE_K8S_VERSION} and reserving ${MINIKUBE_RAM} of RAM and ${MINIKUBE_CPUS} CPU(s)" 
-	@minikube start \
-		--network-plugin=cni \
-		--kubernetes-version=${MINIKUBE_K8S_VERSION} \
-		--memory=${MINIKUBE_RAM} \
-		--cpus=${MINIKUBE_CPUS} \
-		--nodes=${MINIKUBE_NODES}
-	@echo "[minikube] enabling addons: ingress, registry" 
-	@minikube addons enable ingress
-	@minikube addons enable registry
+kind-up: 
+	@echo "[KinD] bootstrapping cluster with kubernetes 1.24" 
+	@chmod +x ./hack/kind-with-registry.sh && ./hack/kind-with-registry.sh
 	@echo "[helm] adding required repos"
 	@helm repo add cockroachdb https://charts.cockroachdb.com/
 	@helm repo add elastic https://helm.elastic.co
@@ -50,26 +38,26 @@ deploy:
 
 
 build-image:
-	@echo "[docker build] building ${IMAGE}:${SHA}"
+	echo "[docker build] building localhost:5001/${IMAGE}:${SHA}"
 	@docker build --file ./Dockerfile.search-monilith \
-		--tag ${IMAGE}:${SHA} \
-		--tag ${IMAGE}:latest \
-		-t ${IMAGE} \
+		--tag localhost:5001/${IMAGE}:${SHA} \
+		--tag localhost:5001/${IMAGE}:latest \
+		-t localhost:5001/${IMAGE} \
 		.
-	@echo "[docker build] building ${CDB_MIGRATIONS_IMAGE}:${SHA}"
+	@echo "[docker build] building localhost:5001/${CDB_MIGRATIONS_IMAGE}:${SHA}"
 	@docker build --file ./Dockerfile.cdb-migrations \
-		--tag ${CDB_MIGRATIONS_IMAGE}:${SHA} \
-		--tag ${CDB_MIGRATIONS_IMAGE}:latest \
-		-t ${CDB_MIGRATIONS_IMAGE} \
+		--tag localhost:5001/${CDB_MIGRATIONS_IMAGE}:${SHA} \
+		--tag localhost:5001/${CDB_MIGRATIONS_IMAGE}:latest \
+		-t localhost:5001/${CDB_MIGRATIONS_IMAGE} \
 		.
 	
-minikube-push-image:
-	@echo "[minikube load image] loading ${IMAGE}:latest"	
-	@minikube image load ${IMAGE}:latest
-	@echo "[minikube load image] loading ${CDB_MIGRATIONS_IMAGE}:latest"	
-	@minikube image load ${CDB_MIGRATIONS_IMAGE}:latest
+push-image:
+	@echo "[load image] loading localhost:5001/${IMAGE}:latest"	
+	@docker push localhost:5001/${IMAGE}
+	@echo "[load image] loading localhost:5001/${CDB_MIGRATIONS_IMAGE}:latest"	
+	@docker push localhost:5001/${CDB_MIGRATIONS_IMAGE}
 
-minikube-build-push: build-image minikube-push-image
+build-push: build-image push-image
 
 db-run-migrations: migrate-check-deps check-db-env
 	migrate -source file://migrations -database '$(subst postgresql,cockroach,${CDB_DSN})' up

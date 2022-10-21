@@ -19,12 +19,12 @@ spec:
       containers:
       - name: search-monolith
         imagePullPolicy: IfNotPresent
-        image: localhost:5000/search-monolith:latest
+        image: localhost:5001/search-monolith:latest
         args:
           - "-crawler-update-interval=5m"
           - "-crawler-num-workers=64"
-          - "-pagerank-update-interval=15m"
-          - "-pagerank-num-workers=8"
+          - "-ranker-update-interval=15m"
+          - "-ranker-num-workers=8"
           - "-link-graph-uri=postgresql://cdb-cockroachdb-public.dataplane:26257/linkgraph?sslmode=disable"
           - "-text-indexer-uri=es://elasticsearch-master.dataplane:9200"
           - "-partition-detection-mode=dns=search-svc-headless"
