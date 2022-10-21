@@ -1,5 +1,5 @@
 antiAffinity: soft
-esJavaOpts: "-Xmx128m -Xms128m"
+esJavaOpts: "-Xmx256m -Xms256m"
 resources:
     requests:
         cpu: "100m"
@@ -12,7 +12,7 @@ volumeClaimTemplate:
     storageClassName: null
     resources:
         requests:
-            storage: 300M
+            storage: 1G
 
 extraInitContainers:
    - name: file-permissions
