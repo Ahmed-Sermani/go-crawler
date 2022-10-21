@@ -18,4 +18,6 @@ FROM alpine
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY --from=builder /go/bin/search /go/bin/search
 
+EXPOSE 8080
+
 ENTRYPOINT ["/go/bin/search"]
